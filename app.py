@@ -14,11 +14,11 @@ st.markdown("Masukkan informasi berikut untuk memprediksi apakah pelanggan akan 
 
 # === Load Model ===
 model_files = [
-    'saved_models/XGBoost_ADASYN_fold1.pkl',
-    'saved_models/XGBoost_ADASYN_fold2.pkl',
-    'saved_models/XGBoost_ADASYN_fold3.pkl',
-    'saved_models/XGBoost_ADASYN_fold4.pkl',
-    'saved_models/XGBoost_ADASYN_fold5.pkl'
+    'XGBoost_ADASYN_fold1.pkl',
+    'XGBoost_ADASYN_fold2.pkl',
+    'XGBoost_ADASYN_fold3.pkl',
+    'XGBoost_ADASYN_fold4.pkl',
+    'XGBoost_ADASYN_fold5.pkl'
 ]
 
 models = [joblib.load(f) for f in model_files]
