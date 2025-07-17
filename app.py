@@ -4,14 +4,14 @@ import joblib
 from collections import Counter
 import os
 
-# ===================
-# Konfigurasi Halaman
-# ===================
-st.set_page_config(page_title="Prediksi Kepuasan Pelanggan", page_icon="✅")
+# ========================
+# Page Configuration
+# ========================
+st.set_page_config(page_title="Customer Satisfaction Prediction", page_icon="✅")
 
-# ===================
-# Tampilkan Logo SVG
-# ===================
+# ========================
+# Display SVG Logo
+# ========================
 if os.path.exists("olist.svg"):
     with open("olist.svg", "r") as f:
         svg_logo = f.read()
@@ -22,28 +22,28 @@ if os.path.exists("olist.svg"):
     )
     st.markdown(svg_logo, unsafe_allow_html=True)
 else:
-    st.warning("⚠️ File 'olist.svg' tidak ditemukan.")
+    st.warning("⚠️ File 'olist.svg' not found.")
 
-# =====================
-# Fungsi Load Kategori
-# =====================
-def load_kategori(file_path):
+# ========================
+# Load Category Function
+# ========================
+def load_categories(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             return [line.strip() for line in f if line.strip()]
     else:
-        st.error(f"File '{file_path}' tidak ditemukan.")
+        st.error(f"File '{file_path}' not found.")
         return []
 
-# =========================
-# Judul dan Deskripsi App
-# =========================
-st.title("📦 Prediksi Kepuasan Pelanggan")
-st.markdown("Masukkan informasi berikut untuk memprediksi apakah pelanggan akan *Satisfied* atau *Not Satisfied* berdasarkan model voting dari 5 model XGBoost.")
+# ========================
+# App Title & Description
+# ========================
+st.title("📦 Customer Satisfaction Prediction")
+st.markdown("Enter the following information to predict whether a customer will be *Satisfied* or *Not Satisfied* based on a voting system of 5 XGBoost models.")
 
-# ================
-# Load Model Model
-# ================
+# ========================
+# Load Models
+# ========================
 model_files = [
     'XGBoost_ADASYN_fold1.pkl',
     'XGBoost_ADASYN_fold2.pkl',
@@ -57,16 +57,16 @@ for file in model_files:
     try:
         models.append(joblib.load(file))
     except Exception as e:
-        st.error(f"Gagal memuat model '{file}': {e}")
+        st.error(f"Failed to load model '{file}': {e}")
 
-# =====================
-# Load Kategori Produk
-# =====================
-opsi = load_kategori('kategori.txt')
+# ========================
+# Load Product Categories
+# ========================
+categories = load_categories('kategori.txt')
 
-# ================
-# Form Input Data
-# ================
+# ========================
+# Input Form
+# ========================
 with st.form("prediction_form"):
     processing_time = st.number_input("Processing Time (days)", value=0, step=1)
     delivery_time = st.number_input("Delivery Time (days)", value=0, step=1)
@@ -74,25 +74,25 @@ with st.form("prediction_form"):
     review_time = st.number_input("Review Time (days)", value=0, step=1)
     payment_value = st.number_input("Payment Value", value=0, step=1)
 
-    customer_state = st.selectbox("Customer State", [
-        "Tenggara (Sudeste)", "Selatan (Sul)", "Timur Laut (Nordeste)",
-        "Tengah-Barat (Centro-Oeste)", "Utara (Norte)"
+    customer_state = st.selectbox("Customer Region", [
+        "Southeast", "South", "Northeast", 
+        "Central-West", "North"
     ])
-    product_category = st.selectbox("Product Category", opsi)
+    product_category = st.selectbox("Product Category", categories)
     order_status = st.selectbox("Order Status", ['delivered', 'canceled'])
-    payment_type = st.selectbox("Payment Type", [
+    payment_type = st.selectbox("Payment Method", [
         'credit_card', 'boleto', 'voucher', 'debit_card',
         'credit_card,voucher', 'voucher,credit_card'
     ])
 
-    submitted = st.form_submit_button("🔍 Prediksi")
+    submitted = st.form_submit_button("🔍 Predict")
 
-# =================
-# Proses Prediksi
-# =================
+# ========================
+# Prediction Processing
+# ========================
 if submitted:
     if not models:
-        st.error("Model belum dimuat. Tidak dapat melakukan prediksi.")
+        st.error("No models loaded. Cannot proceed with prediction.")
     else:
         df_input = pd.DataFrame([{
             'processing_time_days': processing_time,
@@ -108,14 +108,14 @@ if submitted:
 
         try:
             predictions = [model.predict(df_input)[0] for model in models]
-            hasil_terbanyak = Counter(predictions).most_common(1)[0][0]
+            majority_vote = Counter(predictions).most_common(1)[0][0]
 
-            if hasil_terbanyak == 1:
-                st.success("✅ Prediksi: **Satisfied**")
+            if majority_vote == 1:
+                st.success("✅ Prediction: **Satisfied**")
             else:
-                st.error("❌ Prediksi: **Not Satisfied**")
+                st.error("❌ Prediction: **Not Satisfied**")
 
-            st.markdown(f"📊 **Voting dari semua model:** `{dict(Counter(predictions))}`")
+            st.markdown(f"📊 **Model Voting Results:** `{dict(Counter(predictions))}`")
 
         except Exception as e:
-            st.error(f"Terjadi error saat prediksi: {e}")
+            st.error(f"An error occurred during prediction: {e}")
