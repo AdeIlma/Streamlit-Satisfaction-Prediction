@@ -38,7 +38,7 @@ def load_categories(file_path):
 # ========================
 # App Title & Description
 # ========================
-st.title("📦 Customer Satisfaction Prediction")
+st.title("🔍 E-commerce Customer Satisfaction Prediction (Olist)")
 st.markdown("Enter the following information to predict whether a customer will be *Satisfied* or *Not Satisfied* based on a voting system of 5 XGBoost models.")
 
 # ========================
