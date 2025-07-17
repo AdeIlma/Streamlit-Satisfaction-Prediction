@@ -1,67 +1,84 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from collections import Counter
 
-# Load Trained Model
-model = joblib.load('best_model.pkl')
+# =======================
+# Load Model dan Kategori
+# =======================
 
-# Show SVG Logo
-try:
-    with open("olist.svg", "r") as f:
-        svg_logo = f.read()
+# Fungsi membaca kategori produk
+def load_kategori(file_path):
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip()]
 
-    svg_logo = svg_logo.replace(
-        '<svg',
-        '<svg style="width: 350px; display: block; margin: auto; margin-bottom: 10px;"'
-    )
+# Load semua model fold
+model_files = ['LightGBM_ADASYN_RSCV_fold1.pkl', 'LightGBM_ADASYN_RSCV_fold2.pkl', 'LightGBM_ADASYN_RSCV_fold3.pkl', 'LightGBM_ADASYN_RSCV_fold4.pkl', 'LightGBM_ADASYN_RSCV_fold5.pkl']
+models = [joblib.load(open(filename, 'rb')) for filename in model_files]
 
-    st.markdown(svg_logo, unsafe_allow_html=True)
+# Load kategori dari file .txt
+opsi = load_kategori('kategori.txt')
 
-except FileNotFoundError:
-    st.warning("⚠️ File 'olist.svg' not found. Please make sure it's in the same folder.")
+# =======================
+# Desain UI Streamlit
+# =======================
 
-# Title and Description
-st.markdown(
-    "<h1 style='text-align: center;'>🔍 E-commerce Customer Satisfaction Prediction (Olist)</h1>",
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<p style='text-align: center;'>Enter transaction details to predict whether the customer is satisfied or not based on a machine learning model.</p>",
-    unsafe_allow_html=True
-)
+# Judul
+st.markdown("<h1 style='text-align: center;'>🔍 Prediksi Kepuasan Pelanggan E-commerce</h1>", unsafe_allow_html=True)
 
-# Input Data Form
-st.markdown("## 💡 Transaction Data")
+# Deskripsi singkat
+st.markdown("Masukkan informasi transaksi dan kategori untuk memprediksi apakah pelanggan puas atau tidak berdasarkan model ML.")
+
+# Input numerik
+st.markdown("## 💡 Data Transaksi")
 col1, col2 = st.columns(2)
-
 with col1:
-    review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1, help="Days between delivery and review from the customer.")
-    processing_time_days = st.number_input("🛠️ Processing Time Days", value=0, step=1, help="Time taken by the seller to process the order.")
-    quantity = st.number_input("💰 Quantity", value=1, step=1, help="Number of items ordered.")
+    total_freight = st.number_input("💰 Biaya Ongkir", min_value=0.0, step=0.01)
+    processing_time_days = st.number_input("🛠️ Waktu Proses (processing_time_days)")
+    review_time_days = st.number_input("📝 Jarak Waktu Review (review_time_days)")
 
 with col2:
-    payment_installments = st.number_input("💳 Number of Installments", value=0, step=1, help="Total number of payments made in installments.")
-    review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1, help="Time between review and seller response.")
-    delivery_time_days = st.number_input("🚚 Delivery Time Days", value=0, step=1, help="Days from shipping to delivery.")
-    
+    delivery_time_days = st.number_input("🚚 Waktu Pengiriman (delivery_time_days)")
+    delivery_delay_days = st.number_input("⏰ Keterlambatan Pengiriman (delivery_delay_days)")
+    estimated_delivery_time_days = st.number_input("🚚 Estimasi Waktu Pengiriman (estimated_delivery_time_days)")
+    max_processing_time_days = st.number_input("🛠️ Waktu Proses Terlama (max_processing_time_days)")
 
-# Prediction Output
+# Input kategori
+st.markdown("## 🗂️ Informasi Kategori")
+col3, col4 = st.columns(2)
+with col3:
+    new_customer_state = st.selectbox("🌎 Lokasi Pelanggan (customer_state)", [
+        "Tenggara (Sudeste)", "Selatan (Sul)", "Timur Laut (Nordeste)", 
+        "Tengah-Barat (Centro-Oeste)", "Utara (Norte)"
+    ])
+
+    # Kategori produk full width
+    product_category_name_english = st.selectbox("🏷️ Kategori Produk (product_category_name_english)", opsi)
+
+# Tombol prediksi
 st.markdown("---")
-if st.button("🔍 Predict"):
+if st.button("🔍 Prediksi"):
+    # Buat DataFrame dari input
     input_df = pd.DataFrame([{
         'processing_time_days': processing_time_days,
+        'delivery_time_days': delivery_time_days,
+        'delivery_delay_days': delivery_delay_days,
         'review_time_days': review_time_days,
-        'quantity': quantity,
-        'review_response_time_days': review_response_time_days,
-        'payment_installments': payment_installments,
-        'delivery_time_days': delivery_time_days
+        'product_category_name_english': product_category_name_english,
+        'new_customer_state': new_customer_state,
+        'estimated_delivery_time_days': estimated_delivery_time_days,
+        'total_freight': total_freight,
+        'max_processing_time_days': max_processing_time_days
     }])
 
-    prediction = model.predict(input_df)[0]
 
-    if prediction == 1:
-        st.success("✅ Prediction: **Satisfied**")
-        st.markdown("> This customer is likely to leave a **positive review** based on the transaction details.")
+    # Voting dari semua model
+    hasil = [model.predict(input_df)[0] for model in models]
+    hasil_terbanyak = Counter(hasil).most_common(1)[0][0]
+
+    # Output hasil
+    if hasil_terbanyak == 1:
+        st.success("✅ Prediksi: **Satisfied**")
     else:
-        st.error("❌ Prediction: **Not Satisfied**")
-        st.markdown("> This customer may be **dissatisfied**. Please review the delivery, response, or processing time.")
+        st.error("❌ Prediksi: **Not Satisfied**")
