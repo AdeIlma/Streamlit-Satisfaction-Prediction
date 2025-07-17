@@ -3,6 +3,21 @@ import pandas as pd
 import joblib
 from collections import Counter
 
+# Show SVG Logo
+try:
+    with open("olist.svg", "r") as f:
+        svg_logo = f.read()
+
+    svg_logo = svg_logo.replace(
+        '<svg',
+        '<svg style="width: 350px; display: block; margin: auto; margin-bottom: 10px;"'
+    )
+
+    st.markdown(svg_logo, unsafe_allow_html=True)
+
+except FileNotFoundError:
+    st.warning("⚠️ File 'olist.svg' not found. Please make sure it's in the same folder.")
+
 def load_kategori(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return [line.strip() for line in f if line.strip()]
