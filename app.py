@@ -72,7 +72,7 @@ with st.form("prediction_form"):
     delivery_time = st.number_input("Delivery Time (days)", value=0, step=1)
     delivery_delay = st.number_input("Delivery Delay (days)", value=0, step=1)
     review_time = st.number_input("Review Time (days)", value=0, step=1)
-    payment_value = st.number_input("Payment Value", value=0, step=1)
+    payment_value = st.number_input("Payment Value", value=00.00, step=1)
 
     customer_state = st.selectbox("Customer Region", [
         "Southeast", "South", "Northeast", 
