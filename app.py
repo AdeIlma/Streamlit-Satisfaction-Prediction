@@ -68,22 +68,24 @@ categories = load_categories('kategori.txt')
 # Input Form
 # ========================
 with st.form("prediction_form"):
-    processing_time = st.number_input("Processing Time (days)", value=0, step=1)
-    delivery_time = st.number_input("Delivery Time (days)", value=0, step=1)
-    delivery_delay = st.number_input("Delivery Delay (days)", value=0, step=1)
-    review_time = st.number_input("Review Time (days)", value=0, step=1)
-    payment_value = st.number_input("Payment Value", value=00.00, step=1)
-
-    customer_state = st.selectbox("Customer Region", [
-        "Southeast", "South", "Northeast", 
-        "Central-West", "North"
-    ])
-    product_category = st.selectbox("Product Category", categories)
-    order_status = st.selectbox("Order Status", ['delivered', 'canceled'])
+    review_time = st.number_input("Review Time (days)", value=0, step=1, value=0, step=1, help="Days between delivery and customer review."
+    processing_time = st.number_input("Processing Time (days)", value=0, step=1, help="Days between order and shipment by the seller.")
+    delivery_time = st.number_input("Delivery Time (days)", value=0, step=1, help="Days between delivery and review from the customer.")
     payment_type = st.selectbox("Payment Method", [
         'credit_card', 'boleto', 'voucher', 'debit_card',
-        'credit_card,voucher', 'voucher,credit_card'
-    ])
+        'credit_card,voucher', 'voucher,credit_card'], 
+        help="The payment method used by the customer. May include combinations of methods."
+    )
+    customer_state = st.selectbox("Customer Region", [
+        "Tenggara (Sudeste)", "Selatan (Sul)", "Timur Laut (Nordeste)", 
+        "Tengah-Barat (Centro-Oeste)", "Utara (Norte)"],
+        help="The geographic region where the customer is located."
+    )
+    delivery_delay = st.number_input("Delivery Delay (days)", value=0, step=1, help="Days of delay beyond estimated delivery date.")
+    product_category = st.selectbox("Product Category", categories, help="The category of the product purchased by the customer.")
+    payment_value = st.number_input("Payment Value", value=00.00, step=00.01, value=0, step=1, help="Total payment value of the order.")
+    order_status = st.selectbox("Order Status", ['delivered', 'canceled'], help="The final status of the order: whether it was delivered or canceled.")
+
 
     submitted = st.form_submit_button("🔍 Predict")
 
