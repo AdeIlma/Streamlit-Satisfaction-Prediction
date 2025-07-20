@@ -68,7 +68,7 @@ categories = load_categories('kategori.txt')
 # Input Form
 # ========================
 with st.form("prediction_form"):
-    review_time = st.number_input("Review Time (days)", value=0, step=1, value=0, step=1, help="Days between delivery and customer review."
+    review_time = st.number_input("Review Time (days)", value=0, step=1, value=0, step=1, help="Days between delivery and customer review.")
     processing_time = st.number_input("Processing Time (days)", value=0, step=1, help="Days between order and shipment by the seller.")
     delivery_time = st.number_input("Delivery Time (days)", value=0, step=1, help="Days between delivery and review from the customer.")
     payment_type = st.selectbox("Payment Method", [
