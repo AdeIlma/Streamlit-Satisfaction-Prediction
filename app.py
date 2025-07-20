@@ -5,7 +5,7 @@ import joblib
 # ========================
 # Load Trained Model
 # ========================
-model_dict = joblib.load('xgb_smoten_joblib.pkl')
+model_dict = joblib.load('xgb_smoten_jcoba.pkl')
 model = model_dict['model']
 threshold = model_dict['threshold']  # ambil threshold custom
 
