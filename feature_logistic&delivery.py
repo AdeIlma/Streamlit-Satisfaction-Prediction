@@ -101,3 +101,7 @@ if st.button("🔍 Predict Satisfaction"):
     else:
         st.error("❌ The customer is predicted to be **NOT SATISFIED** with the service.")
         st.markdown("<div style='text-align:center; font-size:40px;'>😟</div>", unsafe_allow_html=True)
+
+    
+    st.markdown(f"📊 Voting Hasil Model: {dict(Counter(votes))}")
+
