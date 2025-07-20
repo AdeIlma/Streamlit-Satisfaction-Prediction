@@ -61,13 +61,13 @@ with st.form("prediction_form"):
     col1, col2 = st.columns(2)
 
     with col1:
-        review_time = st.number_input("📆 Review Time (days)", min_value=0, step=1, help="Days between delivery and customer review.")
-        processing_time = st.number_input("🏷️ Processing Time (days)", min_value=0, step=1, help="Days between order and shipment.")
-        delivery_time = st.number_input("🚚 Delivery Time (days)", min_value=0, step=1, help="Days between delivery and customer review.")
-        delivery_delay = st.number_input("⏱️ Delivery Delay (days)", min_value=0, step=1, help="Delay days beyond the estimated delivery date.")
+        review_time = st.number_input("📆 Review Time (days)", value=0, step=1, help="Days between delivery and customer review.")
+        processing_time = st.number_input("🏷️ Processing Time (days)", value=0, step=1, help="Days between order and shipment.")
+        delivery_time = st.number_input("🚚 Delivery Time (days)", value=0, step=1, help="Days between delivery and customer review.")
+        delivery_delay = st.number_input("⏱️ Delivery Delay (days)", value=0, step=1, help="Delay days beyond the estimated delivery date.")
 
     with col2:
-        payment_value = st.number_input("💰 Payment Value", min_value=0.0, step=0.01, help="Total payment amount.")
+        payment_value = st.number_input("💰 Payment Value", value=0.0, step=0.01, help="Total payment amount.")
         payment_type = st.selectbox("💳 Payment Method", [
             'credit_card', 'boleto', 'voucher', 'debit_card',
             'credit_card,voucher', 'voucher,credit_card'
