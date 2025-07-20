@@ -37,6 +37,7 @@ with col1:
     total_freight = st.number_input("💰 Biaya Ongkir", min_value=0.0, step=0.01)
     processing_time_days = st.number_input("🛠️ Waktu Proses (processing_time_days)")
     review_time_days = st.number_input("📝 Jarak Waktu Review (review_time_days)")
+    review_response_time_days = st.number_input("📝 Jarak Waktu Review (review_response_time_days)")
 
 with col2:
     delivery_time_days = st.number_input("🚚 Waktu Pengiriman (delivery_time_days)")
@@ -69,7 +70,8 @@ if st.button("🔍 Prediksi"):
         'new_customer_state': new_customer_state,
         'estimated_delivery_time_days': estimated_delivery_time_days,
         'total_freight': total_freight,
-        'max_processing_time_days': max_processing_time_days
+        'max_processing_time_days': max_processing_time_days,
+        'review_response_time_days': review_response_time_days
     }])
 
 
