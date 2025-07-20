@@ -13,7 +13,7 @@ if os.path.exists("olist.svg"):
 
     svg_logo = svg_logo.replace(
         '<svg',
-        '<svg style="width: 250px; display: block; margin: auto; margin-bottom: 20px;"'
+        '<svg style="width: 350px; display: block; margin: auto; margin-bottom: 20px;"'
     )
     st.markdown(svg_logo, unsafe_allow_html=True)
 else:
