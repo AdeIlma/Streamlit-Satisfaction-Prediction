@@ -7,7 +7,7 @@ import joblib
 # ========================
 model_dict = joblib.load('xgb_smoten_joblib.pkl')
 model = model_dict['model']
-threshold = model_dict['threshold']  # ambil threshold custom
+# threshold = model_dict['threshold']  # ambil threshold custom
 
 # ========================
 # Show SVG Logo (optional)
