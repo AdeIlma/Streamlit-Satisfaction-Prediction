@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load Trained Model
-model = joblib.load('best_model.pkl')
+model = joblib.load('xgb_smoten_joblib.pkl')
 
 # Show SVG Logo
 try:
