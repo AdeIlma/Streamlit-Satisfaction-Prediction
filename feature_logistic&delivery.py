@@ -46,28 +46,21 @@ with st.expander("📥 Input Transaction Data & Product Category", expanded=True
 
     col1, col2 = st.columns(2)
     with col1:
-        total_freight = st.number_input("💰 Freight Cost", min_value=0.0, step=0.01)
+        review_time_days = st.number_input("📝 Review Time (days)", value=0, step=1, help="Number of days between delivery and review.")
         processing_time_days = st.number_input("🛠️ Processing Time (days)", value=0, step=1, help="Number of days from order placed to shipped.")
-        review_time_days = st.number_input("📝 Review Time Lag (days)", value=0, step=1, help="Number of days between delivery and review.")
         review_response_time_days = st.number_input("📝 Review Response Time (days)", value=0, step=1, help="Number of days before the customer gave a review.")
-
-    with col2:
         delivery_time_days = st.number_input("🚚 Delivery Time (days)", value=0, step=1, help="Actual shipping duration in days.")
         delivery_delay_days = st.number_input("⏰ Delivery Delay (days)", value=0, step=1, help="Difference between estimated and actual delivery time.")
+
+    with col2:
+        product_category = st.selectbox("🏷️ Product Category", category_options)
         estimated_delivery_time_days = st.number_input("📦 Estimated Delivery Time (days)", value=0, step=1, help="Estimated delivery time based on system prediction.")
         max_processing_time_days = st.number_input("🔧 Max Processing Time (days)", value=0, step=1, help="Longest recorded processing time.")
-
-    st.markdown("---")
-    st.markdown("### 🗂️ Customer & Product Info")
-
-    col3, col4 = st.columns(2)
-    with col3:
         customer_state = st.selectbox("🌎 Customer Region", [
             "Southeast (Sudeste)", "South (Sul)", "Northeast (Nordeste)",
             "Central-West (Centro-Oeste)", "North (Norte)"
         ])
-    with col4:
-        product_category = st.selectbox("🏷️ Product Category", category_options)
+        total_freight = st.number_input("💰 Freight Cost", min_value=0.0, step=0.01)
 
 # =======================
 # Prediction Button
