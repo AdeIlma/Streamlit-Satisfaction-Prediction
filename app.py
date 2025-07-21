@@ -74,16 +74,15 @@ if st.button("🔍 Predict"):
     # ========================
     # Output
     # ========================
-    st.markdown(f"### 🎯 Probability of Satisfaction: `{probs[1]:.2f}`")
+    st.markdown("### 🎯 Class Probabilities")
+    st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
+    st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
 
-    st.markdown("#### 🔢 Class Probabilities:")
-    st.markdown(f"- ❌ Not Satisfied: `{probs[0]:.2f}`")
-    st.markdown(f"- ✅ Satisfied: `{probs[1]:.2f}`")
-
-    # Bar chart visualisasi
     st.bar_chart(pd.DataFrame({
         'Probability': probs
     }, index=['Not Satisfied', 'Satisfied']))
+
+    st.markdown(f"### 🔮 Final Prediction: `{probs[1]:.2f}` (based on threshold `{threshold}`)")
 
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
