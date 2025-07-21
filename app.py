@@ -45,13 +45,13 @@ col1, col2 = st.columns(2)
 
 with col1:
     review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1, help="Days between delivery and review from the customer.")
-    processing_time_days = st.number_input("🛠️ Processing Time Days", value=0, step=1, help="Time taken by the seller to process the order.")
-    quantity = st.number_input("💰 Quantity", value=1, step=1, help="Number of items ordered.")
+    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=1, step=1, help="Time taken by the seller to process the order.")
+    quantity = st.number_input("💰 Quantity", min_value=1, step=1, help="Number of items ordered.")
 
 with col2:
-    payment_installments = st.number_input("💳 Number of Installments", value=0, step=1, help="Total number of payments made in installments.")
+    payment_installments = st.number_input("💳 Number of Installments", min_value=1, step=1, help="Total number of payments made in installments.")
     review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1, help="Time between review and seller response.")
-    delivery_time_days = st.number_input("🚚 Delivery Time Days", value=0, step=1, help="Days from shipping to delivery.")
+    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1, help="Days from shipping to delivery.")
 
 # ========================
 # Prediction
