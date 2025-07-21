@@ -67,14 +67,24 @@ if st.button("🔍 Predict"):
         'delivery_time_days': delivery_time_days
     }])
 
-    # Prediksi menggunakan threshold kustom
-    prob = model.predict_proba(input_df)[0][1]  # Probabilitas kelas positif
-    prediction = int(prob >= threshold)
+    # Prediksi probabilitas tiap kelas
+    probs = model.predict_proba(input_df)[0]  # [prob_kelas_0, prob_kelas_1]
+    prediction = int(probs[1] >= threshold)
 
     # ========================
     # Output
     # ========================
-    st.markdown(f"### 🎯 Probability of Satisfaction: `{prob:.2f}`")
+    st.markdown(f"### 🎯 Probability of Satisfaction: `{probs[1]:.2f}`")
+
+    st.markdown("#### 🔢 Class Probabilities:")
+    st.markdown(f"- ❌ Not Satisfied: `{probs[0]:.2f}`")
+    st.markdown(f"- ✅ Satisfied: `{probs[1]:.2f}`")
+
+    # Bar chart visualisasi
+    st.bar_chart(pd.DataFrame({
+        'Probability': probs
+    }, index=['Not Satisfied', 'Satisfied']))
+
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
         st.markdown("> This customer is likely to leave a **positive review** based on the transaction details.")
