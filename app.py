@@ -69,7 +69,7 @@ if st.button("🔍 Predict"):
 
     # Prediksi probabilitas tiap kelas
     probs = model.predict_proba(input_df)[0]  # [prob_kelas_0, prob_kelas_1]
-    prediction = int(probs[1] >= threshold)
+    prediction = probs.argmax()  # Tanpa threshold, ambil kelas dengan prob tertinggi
 
     # ========================
     # Output
@@ -82,7 +82,8 @@ if st.button("🔍 Predict"):
         'Probability': probs
     }, index=['Not Satisfied', 'Satisfied']))
 
-    st.markdown(f"### 🔮 Final Prediction: `{probs:.2f}`")
+    predicted_label = "✅ Satisfied" if prediction == 1 else "❌ Not Satisfied"
+    st.markdown(f"### 🔮 Predicted Class: **{predicted_label}**")
 
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
