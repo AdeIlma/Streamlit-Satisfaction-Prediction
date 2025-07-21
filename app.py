@@ -82,7 +82,7 @@ if st.button("🔍 Predict"):
         'Probability': probs
     }, index=['Not Satisfied', 'Satisfied']))
 
-    st.markdown(f"### 🔮 Final Prediction: `{probs[1]:.2f}` (based on threshold `{threshold}`)")
+    st.markdown(f"### 🔮 Final Prediction: `{probs[1]:.2f}`")
 
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
