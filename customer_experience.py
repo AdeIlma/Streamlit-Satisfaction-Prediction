@@ -1,118 +1,140 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from collections import Counter
-import os
+import altair as alt
 
 # ========================
-# Page Configuration
+# Load Trained Model
 # ========================
-st.set_page_config(page_title="Customer Satisfaction Prediction", page_icon="✅", layout="centered")
+model_dict = joblib.load('xgb_smoten_jcoba.pkl')
+model = model_dict['model']
+default_threshold = model_dict['threshold']
+threshold = 0.5  # Bisa disesuaikan jika ingin threshold dinamis
 
 # ========================
-# Display SVG Logo (Optional)
+# Show SVG Logo (optional)
 # ========================
-if os.path.exists("olist.svg"):
+try:
     with open("olist.svg", "r") as f:
         svg_logo = f.read()
-    svg_logo = svg_logo.replace('<svg', '<svg style="width: 350px; display: block; margin: auto; margin-bottom: 20px;"')
+
+    svg_logo = svg_logo.replace(
+        '<svg',
+        '<svg style="width: 350px; display: block; margin: auto; margin-bottom: 10px;"'
+    )
     st.markdown(svg_logo, unsafe_allow_html=True)
-else:
-    st.warning("⚠️ 'olist.svg' not found.")
+
+except FileNotFoundError:
+    st.warning("⚠️ File 'olist.svg' not found. Please make sure it's in the same folder.")
 
 # ========================
-# Load Product Categories
+# Title and Description
 # ========================
-def load_categories(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return [line.strip() for line in f if line.strip()]
-    else:
-        st.error(f"❌ File '{file_path}' not found.")
-        return []
+st.markdown(
+    "<h1 style='text-align: center;'>🔍 E-commerce Customer Satisfaction Prediction (Olist)</h1>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<p style='text-align: center;'>Enter transaction details or upload CSV to predict customer satisfaction based on a machine learning model.</p>",
+    unsafe_allow_html=True
+)
 
-categories = load_categories('kategori.txt')
+# ========================
+# Section: Single Prediction
+# ========================
+st.markdown("## 🧾 Manual Transaction Input")
+
+col1, col2 = st.columns(2)
+with col1:
+    review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1)
+    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=1, step=1)
+    quantity = st.number_input("💰 Quantity", min_value=1, step=1)
+with col2:
+    payment_installments = st.number_input("💳 Number of Installments", min_value=1, step=1)
+    review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1)
+    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1)
 
 # ========================
-# App Header
+# Predict Single Input
 # ========================
-st.markdown("<h2 style='text-align: center;'>🔍 E-commerce Customer Satisfaction Prediction (Olist)</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Fill in the transaction details below to predict customer satisfaction using a machine learning model.</p>", unsafe_allow_html=True)
 st.markdown("---")
+if st.button("🔍 Predict"):
+    input_df = pd.DataFrame([{
+        'processing_time_days': processing_time_days,
+        'review_time_days': review_time_days,
+        'quantity': quantity,
+        'review_response_time_days': review_response_time_days,
+        'payment_installments': payment_installments,
+        'delivery_time_days': delivery_time_days
+    }])
 
-# ========================
-# Load Pre-trained Models
-# ========================
-model_files = [f'XGBoost_ADASYN_fold{i}.pkl' for i in range(1, 6)]
-models = []
+    probs = model.predict_proba(input_df)[0]
+    prediction = 1 if probs[1] >= threshold else 0
 
-for file in model_files:
-    try:
-        models.append(joblib.load(file))
-    except Exception as e:
-        st.error(f"❌ Failed to load model '{file}': {e}")
+    st.markdown("### 🎯 Class Probabilities")
+    st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
+    st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
 
-# ========================
-# Input Form
-# ========================
-with st.form("prediction_form"):
-    st.markdown("### 📝 Transaction Details")
+    chart_df = pd.DataFrame({
+        'Satisfaction': ['Not Satisfied', 'Satisfied'],
+        'Probability': probs
+    })
+    chart = alt.Chart(chart_df).mark_bar().encode(
+        x='Satisfaction',
+        y='Probability',
+        color='Satisfaction'
+    ).properties(width=400, height=300)
 
-    col1, col2 = st.columns(2)
+    st.altair_chart(chart, use_container_width=True)
 
-    with col1:
-        review_time = st.number_input("📆 Review Time (days)", value=0, step=1, help="Days between delivery and customer review.")
-        processing_time = st.number_input("🏷️ Processing Time (days)", value=0, step=1, help="Days between order and shipment.")
-        delivery_time = st.number_input("🚚 Delivery Time (days)", value=0, step=1, help="Days between delivery and customer review.")
-        delivery_delay = st.number_input("⏱️ Delivery Delay (days)", value=0, step=1, help="Delay days beyond the estimated delivery date.")
-
-    with col2:
-        payment_value = st.number_input("💰 Payment Value", value=0.0, step=0.01, help="Total payment amount.")
-        payment_type = st.selectbox("💳 Payment Method", [
-            'credit_card', 'boleto', 'voucher', 'debit_card',
-            'credit_card,voucher', 'voucher,credit_card'
-        ], help="Method of payment used.")
-        order_status = st.selectbox("📦 Order Status", ['delivered', 'canceled'], help="Final status of the order.")
-        customer_state = st.selectbox("🗺️ Customer Region", [
-            "Tenggara (Sudeste)", "Selatan (Sul)", "Timur Laut (Nordeste)",
-            "Tengah-Barat (Centro-Oeste)", "Utara (Norte)"
-        ], help="Region where the customer is located.")
-    
-    product_category = st.selectbox("🛍️ Product Category", categories, help="Category of the purchased product.")
-
-    submitted = st.form_submit_button("🔍 Predict")
-
-# ========================
-# Prediction Logic
-# ========================
-if submitted:
-    if not models:
-        st.error("❌ No models loaded. Cannot proceed with prediction.")
+    if prediction == 1:
+        st.success("✅ Prediction: **Satisfied**")
+        st.markdown("> This customer is likely to leave a **positive review**.")
     else:
-        df_input = pd.DataFrame([{
-            'processing_time_days': processing_time,
-            'delivery_time_days': delivery_time,
-            'delivery_delay_days': delivery_delay,
-            'review_time_days': review_time,
-            'payment_value': payment_value,
-            'new_customer_state': customer_state,
-            'product_category_name_english': product_category,
-            'order_status': order_status,
-            'payment_type': payment_type
-        }])
+        st.error("❌ Prediction: **Not Satisfied**")
+        st.markdown("> This customer may be **dissatisfied**. Review time or delivery time might need improvement.")
 
-        # Voting from all models
-        votes = [model.predict(df_input)[0] for model in models]
-        final_prediction = Counter(votes).most_common(1)[0][0]
+# ========================
+# Section: Bulk Prediction via CSV
+# ========================
+st.markdown("---")
+st.markdown("## 📁 Upload CSV File for Bulk Prediction")
+uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
-        st.markdown("---")
-        st.markdown("### 📊 Prediction Result:")
+if uploaded_file is not None:
+    try:
+        df_bulk = pd.read_csv(uploaded_file)
+        st.success(f"✅ Loaded {len(df_bulk)} rows from uploaded file.")
+        st.dataframe(df_bulk.head())
 
-        if final_prediction == 1:
-            st.success("✅ The customer is predicted to be **SATISFIED** with the service.")
-            st.markdown("<div style='text-align:center; font-size:40px;'>😄</div>", unsafe_allow_html=True)
+        expected_columns = [
+            'processing_time_days',
+            'review_time_days',
+            'quantity',
+            'review_response_time_days',
+            'payment_installments',
+            'delivery_time_days'
+        ]
+
+        if not all(col in df_bulk.columns for col in expected_columns):
+            st.error(f"❌ The CSV must contain these columns:\n{expected_columns}")
         else:
-            st.error("❌ The customer is predicted to be **NOT SATISFIED** with the service.")
-            st.markdown("<div style='text-align:center; font-size:40px;'>😟</div>", unsafe_allow_html=True)
-        # Tampilkan hasil voting dari semua model
-        st.markdown(f"📊 Voting Hasil Model: {dict(Counter(votes))}")
+            if st.button("📊 Predict CSV Data"):
+                probs_bulk = model.predict_proba(df_bulk)
+                df_bulk['prob_not_satisfied'] = probs_bulk[:, 0]
+                df_bulk['prob_satisfied'] = probs_bulk[:, 1]
+                df_bulk['prediction'] = (df_bulk['prob_satisfied'] >= threshold).astype(int)
+                df_bulk['prediction_label'] = df_bulk['prediction'].map({0: 'Not Satisfied', 1: 'Satisfied'})
+
+                st.success("✅ Bulk prediction completed!")
+                st.dataframe(df_bulk.head())
+
+                csv = df_bulk.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="⬇️ Download Prediction Results",
+                    data=csv,
+                    file_name="bulk_prediction_results.csv",
+                    mime="text/csv"
+                )
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
