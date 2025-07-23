@@ -6,10 +6,18 @@ import altair as alt
 # ========================
 # Load Trained Model
 # ========================
-model_dict = joblib.load('best_model.pkl')
-model = model_dict['model']
-default_threshold = model_dict['threshold']
-threshold = 0.5  # Bisa disesuaikan jika ingin threshold dinamis
+try:
+    model_dict = joblib.load('best_model.pkl')
+
+    # Coba ambil threshold jika ada, jika tidak, gunakan default
+    model = model_dict['model'] if isinstance(model_dict, dict) and 'model' in model_dict else model_dict
+    default_threshold = model_dict.get('threshold', 0.5) if isinstance(model_dict, dict) else 0.5
+
+except Exception as e:
+    st.error(f"❌ Gagal memuat model: {e}")
+    st.stop()
+
+threshold = default_threshold  # Bisa diubah jika ingin threshold dinamis
 
 # ========================
 # Show SVG Logo (optional)
@@ -25,7 +33,7 @@ try:
     st.markdown(svg_logo, unsafe_allow_html=True)
 
 except FileNotFoundError:
-    st.warning("⚠️ File 'olist.svg' not found. Please make sure it's in the same folder.")
+    st.warning("⚠️ File 'olist.svg' tidak ditemukan. Pastikan file berada di direktori yang sama.")
 
 # ========================
 # Title and Description
@@ -35,7 +43,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown(
-    "<p style='text-align: center;'>Enter transaction details or upload CSV to predict customer satisfaction based on a machine learning model.</p>",
+    "<p style='text-align: center;'>Masukkan data transaksi atau upload file CSV untuk memprediksi kepuasan pelanggan berdasarkan model machine learning.</p>",
     unsafe_allow_html=True
 )
 
@@ -68,31 +76,35 @@ if st.button("🔍 Predict"):
         'delivery_time_days': delivery_time_days
     }])
 
-    probs = model.predict_proba(input_df)[0]
-    prediction = 1 if probs[1] >= threshold else 0
+    try:
+        probs = model.predict_proba(input_df)[0]
+        prediction = 1 if probs[1] >= threshold else 0
 
-    st.markdown("### 🎯 Class Probabilities")
-    st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
-    st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
+        st.markdown("### 🎯 Class Probabilities")
+        st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
+        st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
 
-    chart_df = pd.DataFrame({
-        'Satisfaction': ['Not Satisfied', 'Satisfied'],
-        'Probability': probs
-    })
-    chart = alt.Chart(chart_df).mark_bar().encode(
-        x='Satisfaction',
-        y='Probability',
-        color='Satisfaction'
-    ).properties(width=400, height=300)
+        chart_df = pd.DataFrame({
+            'Satisfaction': ['Not Satisfied', 'Satisfied'],
+            'Probability': probs
+        })
+        chart = alt.Chart(chart_df).mark_bar().encode(
+            x='Satisfaction',
+            y='Probability',
+            color='Satisfaction'
+        ).properties(width=400, height=300)
 
-    st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, use_container_width=True)
 
-    if prediction == 1:
-        st.success("✅ Prediction: **Satisfied**")
-        st.markdown("> This customer is likely to leave a **positive review**.")
-    else:
-        st.error("❌ Prediction: **Not Satisfied**")
-        st.markdown("> This customer may be **dissatisfied**. Review time or delivery time might need improvement.")
+        if prediction == 1:
+            st.success("✅ Prediction: **Satisfied**")
+            st.markdown("> This customer is likely to leave a **positive review**.")
+        else:
+            st.error("❌ Prediction: **Not Satisfied**")
+            st.markdown("> This customer may be **dissatisfied**. Review time or delivery time might need improvement.")
+
+    except Exception as e:
+        st.error(f"❌ Error in prediction: {e}")
 
 # ========================
 # Section: Bulk Prediction via CSV
@@ -137,4 +149,4 @@ if uploaded_file is not None:
                     mime="text/csv"
                 )
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error(f"❌ Error processing CSV: {e}")
