@@ -9,7 +9,7 @@ import altair as alt
 model_dict = joblib.load('xgb_smoten_jcoba.pkl')
 model = model_dict['model']
 default_threshold = model_dict['threshold']
-threshold = 0.5  # Bisa disesuaikan jika ingin threshold dinamis
+threshold = 0.8  # Bisa disesuaikan jika ingin threshold dinamis
 
 # ========================
 # Show SVG Logo (optional)
