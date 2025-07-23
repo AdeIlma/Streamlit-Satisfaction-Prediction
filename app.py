@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import altair as alt  # Tambahkan Altair
+import altair as alt
 
 # ========================
 # Load Trained Model
@@ -57,7 +57,7 @@ with col2:
 # ========================
 # Set Threshold
 # ========================
-threshold = 0.5  # Threshold tetap 0.5
+threshold = 0.5  # Gunakan threshold tetap (tanpa ditampilkan)
 
 # ========================
 # Prediction
@@ -84,14 +84,14 @@ if st.button("🔍 Predict"):
     st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
     st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
 
-    # Buat Bar Chart dengan Altair (label horizontal)
+    # Bar chart dengan Altair
     chart_df = pd.DataFrame({
         'Satisfaction': ['Not Satisfied', 'Satisfied'],
         'Probability': probs
     })
 
     bar_chart = alt.Chart(chart_df).mark_bar().encode(
-        x=alt.X('Satisfaction:N', axis=alt.Axis(labelAngle=0)),  # label horizontal
+        x=alt.X('Satisfaction:N', axis=alt.Axis(labelAngle=0)),
         y=alt.Y('Probability:Q'),
         color='Satisfaction:N'
     ).properties(
@@ -101,9 +101,7 @@ if st.button("🔍 Predict"):
 
     st.altair_chart(bar_chart, use_container_width=True)
 
-    predicted_label = "✅ Satisfied" if prediction == 1 else "❌ Not Satisfied"
-    st.markdown(f"### 🔮 Predicted Class (Threshold = {threshold}): **{predicted_label}**")
-
+    # Tampilkan hasil prediksi tanpa menyebut threshold
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
         st.markdown("> This customer is likely to leave a **positive review** based on the transaction details.")
