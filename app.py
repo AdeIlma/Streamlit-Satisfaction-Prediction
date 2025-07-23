@@ -7,7 +7,7 @@ import joblib
 # ========================
 model_dict = joblib.load('xgb_smoten_jcoba.pkl')
 model = model_dict['model']
-threshold = model_dict['threshold']  # ambil threshold custom
+default_threshold = model_dict['threshold']  # tetap simpan jika mau digunakan kembali
 
 # ========================
 # Show SVG Logo (optional)
@@ -44,14 +44,19 @@ st.markdown("## 💡 Transaction Data")
 col1, col2 = st.columns(2)
 
 with col1:
-    review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1, help="Days between delivery and review from the customer.")
-    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=1, step=1, help="Time taken by the seller to process the order.")
-    quantity = st.number_input("💰 Quantity", min_value=1, step=1, help="Number of items ordered.")
+    review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1)
+    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=1, step=1)
+    quantity = st.number_input("💰 Quantity", min_value=1, step=1)
 
 with col2:
-    payment_installments = st.number_input("💳 Number of Installments", min_value=1, step=1, help="Total number of payments made in installments.")
-    review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1, help="Time between review and seller response.")
-    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1, help="Days from shipping to delivery.")
+    payment_installments = st.number_input("💳 Number of Installments", min_value=1, step=1)
+    review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1)
+    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1)
+
+# ========================
+# Set Threshold (Fixed to 0.5)
+# ========================
+threshold = 0.5  # <- diatur di sini
 
 # ========================
 # Prediction
@@ -67,9 +72,9 @@ if st.button("🔍 Predict"):
         'delivery_time_days': delivery_time_days
     }])
 
-    # Prediksi probabilitas tiap kelas
-    probs = model.predict_proba(input_df)[0]  # [prob_kelas_0, prob_kelas_1]
-    prediction = probs.argmax()  # Tanpa threshold, ambil kelas dengan prob tertinggi
+    # Prediksi probabilitas
+    probs = model.predict_proba(input_df)[0]
+    prediction = 1 if probs[1] >= threshold else 0
 
     # ========================
     # Output
@@ -83,7 +88,7 @@ if st.button("🔍 Predict"):
     }, index=['Not Satisfied', 'Satisfied']))
 
     predicted_label = "✅ Satisfied" if prediction == 1 else "❌ Not Satisfied"
-    st.markdown(f"### 🔮 Predicted Class: **{predicted_label}**")
+    st.markdown(f"### 🔮 Predicted Class (Threshold = {threshold}): **{predicted_label}**")
 
     if prediction == 1:
         st.success("✅ Prediction: **Satisfied**")
