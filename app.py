@@ -1,13 +1,14 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import altair as alt  # Tambahkan Altair
 
 # ========================
 # Load Trained Model
 # ========================
 model_dict = joblib.load('xgb_smoten_jcoba.pkl')
 model = model_dict['model']
-default_threshold = model_dict['threshold']  # tetap simpan jika mau digunakan kembali
+default_threshold = model_dict['threshold']
 
 # ========================
 # Show SVG Logo (optional)
@@ -54,9 +55,9 @@ with col2:
     delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1)
 
 # ========================
-# Set Threshold (Fixed to 0.5)
+# Set Threshold
 # ========================
-threshold = 0.5  # <- diatur di sini
+threshold = 0.5  # Threshold tetap 0.5
 
 # ========================
 # Prediction
@@ -83,9 +84,22 @@ if st.button("🔍 Predict"):
     st.markdown(f"- ❌ Not Satisfied (Class 0): `{probs[0]:.2f}`")
     st.markdown(f"- ✅ Satisfied (Class 1): `{probs[1]:.2f}`")
 
-    st.bar_chart(pd.DataFrame({
+    # Buat Bar Chart dengan Altair (label horizontal)
+    chart_df = pd.DataFrame({
+        'Satisfaction': ['Not Satisfied', 'Satisfied'],
         'Probability': probs
-    }, index=['Not Satisfied', 'Satisfied']))
+    })
+
+    bar_chart = alt.Chart(chart_df).mark_bar().encode(
+        x=alt.X('Satisfaction:N', axis=alt.Axis(labelAngle=0)),  # label horizontal
+        y=alt.Y('Probability:Q'),
+        color='Satisfaction:N'
+    ).properties(
+        width=400,
+        height=300
+    )
+
+    st.altair_chart(bar_chart, use_container_width=True)
 
     predicted_label = "✅ Satisfied" if prediction == 1 else "❌ Not Satisfied"
     st.markdown(f"### 🔮 Predicted Class (Threshold = {threshold}): **{predicted_label}**")
