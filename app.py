@@ -48,12 +48,12 @@ st.markdown("## 🧾 Manual Transaction Input")
 col1, col2 = st.columns(2)
 with col1:
     review_time_days = st.number_input("📝 Time Gap to Review Days", value=0, step=1)
-    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=1, step=1)
+    processing_time_days = st.number_input("🛠️ Processing Time Days", min_value=0, step=1)
     quantity = st.number_input("💰 Quantity", min_value=1, step=1)
 with col2:
     payment_installments = st.number_input("💳 Number of Installments", min_value=1, step=1)
     review_response_time_days = st.number_input("💬 Seller Response Time Gap Days", value=0, step=1)
-    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=1, step=1)
+    delivery_time_days = st.number_input("🚚 Delivery Time Days", min_value=0, step=1)
 
 # ========================
 # Predict Single Input
